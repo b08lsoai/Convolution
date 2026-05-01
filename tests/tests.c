@@ -11,7 +11,7 @@
 #include "utils/image_io.h"
 // clang-format on
 
-#define INPUT_IMAGE "./images/file.jpg"
+#define INPUT_IMAGE "./images/test_image.jpg"
 
 // Checking that parallel modes get the result as sequential
 #define TEST_CONVOL(convol_mode)                                               \

@@ -50,4 +50,4 @@ fmt:
 
 # Default values for benchmark
 FILTER ?= motion
-IMAGE ?= ./images/file.jpg
+IMAGE ?= ./images/test_image.jpg
