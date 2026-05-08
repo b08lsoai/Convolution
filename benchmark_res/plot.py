@@ -5,13 +5,13 @@ import pandas as pd
 modes = []
 data = []
 
-filename = "result"
+filename = "result_small"
 
 def read_benchmark_data_pandas(filename):
     df = pd.read_csv(filename + ".csv", comment='#')
     
     modes = df['mode'].tolist()
-    value_cols = [col for col in df.columns if col != 'mode' and col != 'avg']
+    value_cols = [col for col in df.columns if col != 'mode']
     data = [df[col].tolist() for col in value_cols]
     data = list(zip(*data))  
     
@@ -19,7 +19,7 @@ def read_benchmark_data_pandas(filename):
 
 modes, data = read_benchmark_data_pandas(filename)
 
-fig, ax = plt.subplots(figsize=(10, 6))
+fig, ax = plt.subplots(figsize=(8, 6))
 
 bp = ax.boxplot(
     data,
@@ -36,12 +36,12 @@ for patch, color in zip(bp["boxes"], colors * 10):
 
 for i, d in enumerate(data, start=1):
     x = np.random.normal(i, 0.04, size=len(d))
-    ax.plot(x, d, "o", markersize=4, alpha=0.7, color="black")
+    ax.plot(x, d, "o", markersize=5, alpha=0.3, color="black")
 
 ax.set_xticks(np.arange(1, len(modes) + 1))
 ax.set_xticklabels(modes, rotation=20)
 ax.set_ylabel("Time (sec)")
-ax.set_title("Benchmark Results")
+ax.set_title("Benchmark: motion (9x9) | 736x469")
 
 plt.grid(True, axis="y", linestyle="--", alpha=0.6)
 plt.tight_layout()
