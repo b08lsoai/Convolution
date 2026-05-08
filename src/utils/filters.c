@@ -83,7 +83,7 @@ filter_t *create_filter(filter_name name) {
   case (SHARPEN):
     return init_filter(5, 0.0, 1.0 / 8.0, sharpen_arr, "sharpen");
   default:
-    fprintf(stderr, "Error: Error: unknown filter.\n");
+    fprintf(stderr, "Error: unknown filter.\n");
     return NULL;
   }
 }
