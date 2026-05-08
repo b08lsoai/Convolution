@@ -61,7 +61,7 @@ void print_help(char *argv[]) {
          argv[0]);
 
   printf("Options:\n");
-  printf("  --filter      Filter to apply\n");
+  printf("  --filter=     Filter to apply\n");
   printf("                  Available: blur, motion, gaussian, edges, emboss, "
          "sharpen\n\n");
   printf("  --mode=       Parallelization strategy\n");
@@ -118,7 +118,7 @@ int parse_args(int argc, char *argv[], args_t *args) {
         fprintf(stderr, "Valid modes: seq, pixel, row, column, block\n");
         return -1;
       }
-    } else if (strncmp(argv[i], "--help", 6) == 0) {
+    } else if (strcmp(argv[i], "--help") == 0) {
       print_help(argv);
       args->help_flag = true;
       return 0;
