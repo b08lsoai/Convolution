@@ -63,13 +63,14 @@ void print_help(char *argv[]) {
   printf("Options:\n");
   printf("  --filter=     Filter to apply\n");
   printf("                  Available: blur, motion, gaussian, edges, emboss, "
+         "sharpen"
          "sharpen\n\n");
   printf("  --mode=       Parallelization strategy\n");
   printf("                  seq      - Sequential\n");
   printf("                  row      - Parallel by rows\n");
   printf("                  column   - Parallel by columns\n");
   printf("                  pixel    - Parallel by individual pixels\n");
-  printf("                  block    - Parallel by blocks (grid)\n\n");
+  printf("                  block    - Parallel by blocks (64x64)\n\n");
   printf("  --help        Show this help message\n\n");
 }
 
