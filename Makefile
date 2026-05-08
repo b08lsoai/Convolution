@@ -29,15 +29,15 @@ help:
 
 build: $(TARGET)
 
-$(TARGET): $(APP_SRC)
+$(TARGET): $(APP_SRC) $(HDR)
 	@mkdir -p build
-	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
+	$(CC) $(CFLAGS) $(APP_SRC) -o $@ $(LDFLAGS)
 
-$(BENCH_TARGET): $(BENCH_SRC)
+$(BENCH_TARGET): $(BENCH_SRC) $(HDR)
 	@mkdir -p build
-	$(CC) $(CFLAGS_BENCH) $^ -o $@ $(LDFLAGS)
+	$(CC) $(CFLAGS_BENCH) $(BENCH_SRC) -o $@ $(LDFLAGS)
 
-$(TEST_BIN): $(SRC) $(TEST_SRC)
+$(TEST_BIN): $(SRC) $(TEST_SRC) $(HDR)
 	@mkdir -p build
 	$(CC) $(CFLAGS) $(SRC) $(TEST_SRC) -o $@ $(LDFLAGS) -lcmocka
 
