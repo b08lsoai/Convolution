@@ -1,5 +1,10 @@
 CC      := gcc
-CFLAGS  := -Wall -Wextra -O0 -Wpedantic -I./src -I./deps -g
+CFLAGS_COMMON := -Wall -Wextra -Wpedantic -I./src -I./deps
+CFLAGS_DEBUG  := -O0 -g
+CFLAGS_RELEASE := -O2
+
+CFLAGS  := $(CFLAGS_COMMON) $(CFLAGS_DEBUG)
+CFLAGS_BENCH := $(CFLAGS_COMMON) $(CFLAGS_RELEASE) -DNDEBUG
 LDFLAGS := -lm -fopenmp
 
 SRC := $(shell find src -name '*.c' ! -name 'main.c' ! -name 'benchmark.c')
@@ -30,7 +35,7 @@ $(TARGET): $(APP_SRC)
 
 $(BENCH_TARGET): $(BENCH_SRC)
 	@mkdir -p build
-	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
+	$(CC) $(CFLAGS_BENCH) $^ -o $@ $(LDFLAGS)
 
 $(TEST_BIN): $(SRC) $(TEST_SRC)
 	@mkdir -p build
@@ -46,7 +51,7 @@ clean:
 	rm -rf build
 
 fmt:
-	clang-format -i $(SRC) $(APP_SRC) $(HDR) $(TEST_SRC)
+	clang-format -i $(SRC) $(APP_SRC) $(HDR) $(TEST_SRC) $(BENCH_SRC)
 
 # Default values for benchmark
 FILTER ?= motion
