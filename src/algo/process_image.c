@@ -2,8 +2,7 @@
 
 #include "convolution.h"
 
-#define FREE                                                                   \
-  free_filter(filter);                                                         \
+#define FREE_IMAGES                                                            \
   free_image(image);                                                           \
   free_image(new_image)
 
@@ -19,66 +18,80 @@ int process_image(args_t *args) {
     return -1;
   }
 
-  // Images should be placed in the “./images” folder
-  char file_path[512];
-  snprintf(file_path, sizeof(file_path), "./images/%s", args->input_filename);
+  const char *filter_name = filter->name;
+  conv_mode mode = args->mode;
 
-  image_t *image = load_image(file_path);
-  if (!image) {
-    fprintf(stderr, "Error: failed to load image '%s' in ./images\n",
-            args->input_filename);
-    free_filter(filter);
-    return -1;
+  for (size_t i = 0; i < args->images_number; i++) {
+    // Images should be placed in the “./images” folder
+    const char *filename = args->filenames[i];
+    char file_path[512];
+    snprintf(file_path, sizeof(file_path), "./images/%s", filename);
+
+    image_t *image = NULL;
+    image_t *new_image = NULL;
+
+    image = load_image(file_path);
+    if (!image) {
+      fprintf(stderr, "Error: failed to load image '%s' in ./images\n",
+              filename);
+      free_filter(filter);
+      return -1;
+    }
+
+    switch (mode) {
+    case MODE_SEQ:
+      new_image = seq_convolution(image, filter);
+      break;
+
+    case MODE_ROW:
+      new_image = parallel_row_convolution(image, filter);
+      break;
+
+    case MODE_PIXEL:
+      new_image = parallel_pixel_convolution(image, filter);
+      break;
+
+    case MODE_COLUMN:
+      new_image = parallel_column_convolution(image, filter);
+      break;
+
+    case MODE_BLOCK:
+      new_image = parallel_block_convolution(image, filter);
+      break;
+
+    default:
+      fprintf(stderr, "Error: unknown mode %d\n", mode);
+      FREE_IMAGES;
+      free_filter(filter);
+      return -1;
+    }
+
+    if (!new_image) {
+      fprintf(stderr, "Error: convolution failed\n");
+      FREE_IMAGES;
+      free_filter(filter);
+      return -1;
+    }
+
+    const char *new_filename = generate_filename(file_path, filter_name);
+    if (!new_filename) {
+      fprintf(stderr, "Error: failed to generate output filename\n");
+      FREE_IMAGES;
+      free_filter(filter);
+      return -1;
+    }
+
+    int ret = store_image(new_filename, new_image);
+    if (ret < 0) {
+      fprintf(stderr, "Error: failed to save output filename\n");
+      FREE_IMAGES;
+      free_filter(filter);
+      return -1;
+    }
+
+    FREE_IMAGES;
   }
 
-  image_t *new_image = NULL;
-  switch (args->mode) {
-  case MODE_SEQ:
-    new_image = seq_convolution(image, filter);
-    break;
-
-  case MODE_ROW:
-    new_image = parallel_row_convolution(image, filter);
-    break;
-
-  case MODE_PIXEL:
-    new_image = parallel_pixel_convolution(image, filter);
-    break;
-
-  case MODE_COLUMN:
-    new_image = parallel_column_convolution(image, filter);
-    break;
-
-  case MODE_BLOCK:
-    new_image = parallel_block_convolution(image, filter);
-    break;
-
-  default:
-    fprintf(stderr, "Error: unknown mode %d\n", args->mode);
-    FREE;
-    return -1;
-  }
-
-  if (!new_image) {
-    fprintf(stderr, "Error: convolution failed\n");
-    FREE;
-    return -1;
-  }
-
-  const char *new_filename = generate_filename(file_path, filter->name);
-  if (!new_filename) {
-    fprintf(stderr, "Error: failed to generate output filename\n");
-    FREE;
-    return -1;
-  }
-
-  int ret = store_image(new_filename, new_image);
-  if (ret < 0) {
-    fprintf(stderr, "Error: failed to save output filename\n");
-    FREE;
-    return -1;
-  }
-
-  FREE;
+  free_filter(filter);
   return 0;
 }

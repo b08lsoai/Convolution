@@ -22,10 +22,12 @@ typedef enum {
 } conv_mode;
 
 typedef struct {
-  char *input_filename;
+  char **filenames;
+  size_t images_number;
   conv_mode mode;
   filter_name filter;
   bool help_flag;
 } args_t;
 
 int parse_args(int argc, char *argv[], args_t *args);
+void free_args(args_t *args);

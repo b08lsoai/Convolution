@@ -14,20 +14,20 @@ int main(int argc, char **argv) {
 
   int ret = parse_args(argc, argv, args);
   if (ret < 0) {
-    free(args);
+    free_args(args);
     return -1;
   }
 
   if (args->help_flag) {
-    free(args);
+    free_args(args);
     return 0;
   }
 
   ret = process_image(args);
   if (ret < 0) {
-    free(args);
+    free_args(args);
     return -1;
   }
-  free(args);
+  free_args(args);
   return 0;
 }

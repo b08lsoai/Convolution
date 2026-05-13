@@ -5,6 +5,8 @@
 
 #include "parser_args.h"
 
+#define INITIAL_CAPACITY 8
+
 #define USAGE_PRINT                                                            \
   fprintf(stderr,                                                              \
           "Usage: %s --filter=<filter_name> --mode=<mode> [--help] "           \
@@ -19,7 +21,8 @@ bool is_file(char *filename) { return (filename && strchr(filename, '.')); }
 void init_args(args_t *args) {
   args->filter = INVALID;
   args->help_flag = false;
-  args->input_filename = NULL;
+  args->filenames = NULL;
+  args->images_number = 0;
   args->mode = MODE_INVALID;
 }
 
@@ -55,6 +58,22 @@ conv_mode parse_mode_arg(char *mode_str) {
   return MODE_INVALID;
 }
 
+// TODO: add capacity increase
+static int add_filename(args_t *args, char *filename) {
+  if (args->filenames == NULL) {
+    args->filenames = malloc(INITIAL_CAPACITY * sizeof(char *));
+    if (!args->filenames) {
+      fprintf(stderr, "Error: memory allocation failed while adding file\n");
+      return -1;
+    }
+  }
+
+  args->filenames[args->images_number] = filename;
+  args->images_number++;
+
+  return 0;
+}
+
 void print_help(char *argv[]) {
   printf("Usage: %s --filter=<filter_name> --mode=<mode> [--help] "
          "<input_file>\n\n",
@@ -63,7 +82,6 @@ void print_help(char *argv[]) {
   printf("Options:\n");
   printf("  --filter=     Filter to apply\n");
   printf("                  Available: blur, motion, gaussian, edges, emboss, "
-         "sharpen"
          "sharpen\n\n");
   printf("  --mode=       Parallelization strategy\n");
   printf("                  seq      - Sequential\n");
@@ -71,7 +89,7 @@ void print_help(char *argv[]) {
   printf("                  column   - Parallel by columns\n");
   printf("                  pixel    - Parallel by individual pixels\n");
   printf("                  block    - Parallel by blocks (64x64)\n\n");
-  printf("  --help        Show this help message\n\n");
+  printf("  --help, -h    Show this help message\n\n");
 }
 
 int parse_args(int argc, char *argv[], args_t *args) {
@@ -119,7 +137,7 @@ int parse_args(int argc, char *argv[], args_t *args) {
         fprintf(stderr, "Valid modes: seq, pixel, row, column, block\n");
         return -1;
       }
-    } else if (strcmp(argv[i], "--help") == 0) {
+    } else if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0) {
       print_help(argv);
       args->help_flag = true;
       return 0;
@@ -129,11 +147,9 @@ int parse_args(int argc, char *argv[], args_t *args) {
       return -1;
     } else {
       if (is_file(argv[i])) {
-        if (args->input_filename != NULL) {
-          fprintf(stderr, "Error: multiple input files are not supported\n");
+        if (add_filename(args, argv[i]) < 0) {
           return -1;
         }
-        args->input_filename = argv[i];
       } else {
         fprintf(stderr, "Error: invalid argument '%s'\n", argv[i]);
         USAGE_PRINT
@@ -150,10 +166,19 @@ int parse_args(int argc, char *argv[], args_t *args) {
     fprintf(stderr, "Error: --mode is required\n");
     return -1;
   }
-  if (args->input_filename == NULL) {
+  if (args->filenames == NULL || args->images_number == 0) {
     fprintf(stderr, "Error: no input file\n");
     return -1;
   }
 
   return 0;
+}
+
+void free_args(args_t *args) {
+  if (args) {
+    if (args->filenames) {
+      free(args->filenames);
+    }
+    free(args);
+  }
 }
