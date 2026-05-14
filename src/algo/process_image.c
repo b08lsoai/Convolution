@@ -22,15 +22,11 @@ int process_image(args_t *args) {
   conv_mode mode = args->mode;
 
   for (size_t i = 0; i < args->images_number; i++) {
-    // Images should be placed in the “./images” folder
     const char *filename = args->filenames[i];
-    char file_path[512];
-    snprintf(file_path, sizeof(file_path), "./images/%s", filename);
-
     image_t *image = NULL;
     image_t *new_image = NULL;
 
-    image = load_image(file_path);
+    image = load_image(filename);
     if (!image) {
       fprintf(stderr, "Error: failed to load image '%s' in ./images\n",
               filename);
@@ -73,7 +69,7 @@ int process_image(args_t *args) {
       return -1;
     }
 
-    const char *new_filename = generate_filename(file_path, filter_name);
+    const char *new_filename = generate_filename(filename, filter_name);
     if (!new_filename) {
       fprintf(stderr, "Error: failed to generate output filename\n");
       FREE_IMAGES;
