@@ -3,6 +3,9 @@ CFLAGS_COMMON := -Wall -Wextra -Wpedantic -I./src -I./deps
 CFLAGS_DEBUG  := -O0 -g
 CFLAGS_RELEASE := -O2
 
+CFLAGS_ASAN := -fsanitize=address -g -O0 -fno-omit-frame-pointer
+LDFLAGS_ASAN := -fsanitize=address
+
 CFLAGS  := $(CFLAGS_COMMON) $(CFLAGS_DEBUG)
 CFLAGS_BENCH := $(CFLAGS_COMMON) $(CFLAGS_RELEASE) -DNDEBUG
 LDFLAGS := -lm -fopenmp
@@ -47,6 +50,10 @@ bench: $(BENCH_TARGET)
 test: $(TEST_BIN)
 	@./$(TEST_BIN)
 
+asan: clean
+	@mkdir -p build
+	$(CC) $(CFLAGS) $(CFLAGS_ASAN) $(APP_SRC) -o $(TARGET)_asan $(LDFLAGS) $(LDFLAGS_ASAN)
+	
 clean:
 	rm -rf build
 
