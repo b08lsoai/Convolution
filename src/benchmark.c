@@ -37,7 +37,7 @@ static void save_results_csv(image_t *image, char *filter_name, double *seq_res,
                              double *row_res, double *pixel_res,
                              double *column_res, double *block_res) {
 
-  FILE *f = fopen("./benchmark_res/result.csv", "w");
+  FILE *f = fopen("./benchmark_res/resul1t.csv", "w");
   if (f == NULL) {
     perror("Failed to create result file");
     return;
@@ -56,25 +56,30 @@ static void save_results_csv(image_t *image, char *filter_name, double *seq_res,
   }
   fprintf(f, "\n");
 
-  fprintf(f, "seq: %.6f\n", average(seq_res));
+  fprintf(f, "seq: %.6f", average(seq_res));
   for (int i = 0; i < NUM_RUNS; i++)
     fprintf(f, ",%.6f", seq_res[i]);
+  fprintf(f, "\n");
 
-  fprintf(f, "row: %.6f\n", average(row_res));
+  fprintf(f, "row: %.6f", average(row_res));
   for (int i = 0; i < NUM_RUNS; i++)
     fprintf(f, ",%.6f", row_res[i]);
+  fprintf(f, "\n");
 
-  fprintf(f, "pixel: %.6f\n", average(pixel_res));
+  fprintf(f, "pixel: %.6f", average(pixel_res));
   for (int i = 0; i < NUM_RUNS; i++)
     fprintf(f, ",%.6f", pixel_res[i]);
+  fprintf(f, "\n");
 
-  fprintf(f, "column: %.6f\n", average(column_res));
+  fprintf(f, "column: %.6f", average(column_res));
   for (int i = 0; i < NUM_RUNS; i++)
     fprintf(f, ",%.6f", column_res[i]);
+  fprintf(f, "\n");
 
-  fprintf(f, "block: %.6f\n", average(block_res));
+  fprintf(f, "block: %.6f", average(block_res));
   for (int i = 0; i < NUM_RUNS; i++)
     fprintf(f, ",%.6f", block_res[i]);
+  fprintf(f, "\n");
 
   fclose(f);
   printf("\nResults saved\n");
