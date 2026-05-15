@@ -46,6 +46,7 @@
 
 **Configuration:**
 - Filter: motion (9x9)
+- Mode: block
 - Runs: 20
 - Readers: 2 (default)
 - Workers: 4 (default)
@@ -61,6 +62,23 @@
 | 50 | 97.8328 | **22.1037** |
 
 ![Image Benchmark](standard_vs_queue.png)
+
+## Pipeline Thread Scaling
+
+**Configuration:**
+- Filter: motion (9x9)
+- Mode: block
+- Runs: 20
+- Number of files: 20
+
+| Workers | Readers | Writers | Avg (sec) |
+|---------|---------|---------|------------|
+| 1 | 1 | 1 | 19.9260 |
+| 2 | 1 | 1 | 12.7607 |
+| 4 | 1 | 1 | 8.3654 |
+| 4 | 2 | 2 | 7.8445 |
+| 8 | 2 | 2 | 6.2763 |
+| 12 | 2 | 2 | 6.1634 | 
 
 ## Conclusion
 
