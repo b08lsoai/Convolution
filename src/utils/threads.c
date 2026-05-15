@@ -4,10 +4,6 @@
 #include "algo/convolution.h"
 #include "threads.h"
 
-// Global counters for tracking file progress across threads
-size_t written_files = 0;
-size_t read_files = 0;
-
 void *reader_thread(void *arg) {
   params_t *params = (params_t *)arg;
   queue_t *load_queue = params->load_queue;
@@ -16,10 +12,11 @@ void *reader_thread(void *arg) {
   size_t files_number = params->images_number;
 
   while (1) {
-    read_files_local = __atomic_fetch_add(&read_files, 1, __ATOMIC_ACQUIRE);
+    read_files_local =
+        __atomic_fetch_add(params->read_counter, 1, __ATOMIC_ACQUIRE);
     if (read_files_local >= files_number) {
       // ? нужен ли откат
-      __atomic_fetch_sub(&read_files, 1, __ATOMIC_RELEASE);
+      __atomic_fetch_sub(params->read_counter, 1, __ATOMIC_RELEASE);
       break;
     }
     const char *filename = files_list[read_files_local];
@@ -83,7 +80,7 @@ void *worker_thread(void *arg) {
     }
 
     queue_enqueue(save_queue, new_image, img_info->filename);
-    
+
     free_image(img_info->image);
     img_info_free(img_info);
   }
@@ -94,8 +91,16 @@ void *writer_thread(void *arg) {
   params_t *params = (params_t *)arg;
   queue_t *save_queue = params->save_queue;
   const char *filter_name = params->filter->name;
+  size_t read_files_local = 0;
+  size_t files_number = params->images_number;
 
   while (1) {
+
+    read_files_local = __atomic_load_n(params->write_counter, __ATOMIC_ACQUIRE);
+    if (read_files_local >= files_number) {
+      break;
+    }
+
     img_info_t *img_info = queue_dequeue(save_queue);
     if (!img_info->filename && !img_info->image) {
       img_info_free(img_info);
@@ -116,6 +121,8 @@ void *writer_thread(void *arg) {
       img_info_free(img_info);
       break;
     }
+    read_files_local =
+        __atomic_add_fetch(params->write_counter, 1, __ATOMIC_RELEASE);
 
     free_image(img_info->image);
     img_info_free(img_info);

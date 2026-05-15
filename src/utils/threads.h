@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdatomic.h>
+
 #include "filters.h"
 #include "parser_args.h"
 #include "queue.h"
@@ -15,6 +17,8 @@ typedef struct {
   char **filenames;
   size_t images_number;
   conv_mode mode;
+  atomic_size_t *read_counter;
+  atomic_size_t *write_counter;
 } params_t;
 
 void *reader_thread(void *arg);
