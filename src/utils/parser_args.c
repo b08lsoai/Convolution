@@ -1,4 +1,3 @@
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -21,6 +20,7 @@ bool is_file(char *filename) { return (filename && strchr(filename, '.')); }
 void init_args(args_t *args) {
   args->filter = INVALID;
   args->help_flag = false;
+  args->queue_flag = false;
   args->filenames = NULL;
   args->images_number = 0;
   args->mode = MODE_INVALID;
@@ -141,6 +141,8 @@ int parse_args(int argc, char *argv[], args_t *args) {
       print_help(argv);
       args->help_flag = true;
       return 0;
+    } else if (strcmp(argv[i], "--queue") == 0 || strcmp(argv[i], "-q") == 0) {
+      args->queue_flag = true;
     } else if (strncmp(argv[i], "-", 1) == 0) {
       fprintf(stderr, "Error: unknown option '%s'\n", argv[i]);
       USAGE_PRINT
