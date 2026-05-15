@@ -58,19 +58,29 @@ conv_mode parse_mode_arg(char *mode_str) {
   return MODE_INVALID;
 }
 
-// TODO: add capacity increase
 static int add_filename(args_t *args, char *filename) {
+  static size_t capacity = 0;
+
   if (args->filenames == NULL) {
-    args->filenames = malloc(INITIAL_CAPACITY * sizeof(char *));
+    capacity = INITIAL_CAPACITY;
+    args->filenames = malloc(capacity * sizeof(char *));
     if (!args->filenames) {
       fprintf(stderr, "Error: memory allocation failed while adding file\n");
       return -1;
     }
   }
 
-  args->filenames[args->images_number] = filename;
-  args->images_number++;
+  if (args->images_number >= capacity) {
+    capacity *= 2;
+    char **new = realloc(args->filenames, capacity * sizeof(char *));
+    if (!new) {
+      fprintf(stderr, "Error: memory allocation failed while adding file\n");
+      return -1;
+    }
+    args->filenames = new;
+  }
 
+  args->filenames[args->images_number++] = filename;
   return 0;
 }
 
