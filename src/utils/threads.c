@@ -12,8 +12,8 @@ void *reader_thread(void *arg) {
   params_t *params = (params_t *)arg;
   queue_t *load_queue = params->load_queue;
   size_t read_files_local = 0;
-  char **files_list = params->args->filenames;
-  size_t files_number = params->args->images_number;
+  char **files_list = params->filenames;
+  size_t files_number = params->images_number;
 
   while (1) {
     read_files_local = __atomic_fetch_add(&read_files, 1, __ATOMIC_ACQUIRE);
@@ -44,7 +44,7 @@ void *worker_thread(void *arg) {
       break;
     }
     image_t *new_image = NULL;
-    switch (params->args->mode) {
+    switch (params->mode) {
     case MODE_SEQ:
       new_image = seq_convolution(img_info->image, filter);
       break;
@@ -66,7 +66,7 @@ void *worker_thread(void *arg) {
       break;
 
     default:
-      fprintf(stderr, "Error: unknown mode %d\n", params->args->mode);
+      fprintf(stderr, "Error: unknown mode %d\n", params->mode);
       free_image(new_image);
       free_filter(filter);
       break;

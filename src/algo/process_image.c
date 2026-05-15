@@ -111,7 +111,9 @@ int process_image_queue(args_t *args) {
   params_t params = {.load_queue = load_queue,
                      .save_queue = save_queue,
                      .filter = filter,
-                     .args = args};
+                     .filenames = args->filenames,
+                     .mode = args->mode,
+                     .images_number = args->images_number};
 
   pthread_t readers[READERS_NUMBER];
   pthread_t workers[WORKERS_NUMBER];

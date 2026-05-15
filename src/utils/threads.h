@@ -12,7 +12,9 @@ typedef struct {
   queue_t *load_queue;
   queue_t *save_queue;
   filter_t *filter;
-  args_t *args; // for mode, number of files and file list
+  char **filenames;
+  size_t images_number;
+  conv_mode mode;
 } params_t;
 
 void *reader_thread(void *arg);
