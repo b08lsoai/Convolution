@@ -24,15 +24,17 @@ BENCH_QUEUE_TARGET := build/benchmark_queue
 TEST_SRC := $(shell find tests -name '*.c' 2>/dev/null || true)
 TEST_BIN := build/tests
 
-.PHONY: build clean fmt test bench bench-queue help
+.PHONY: build clean fmt test bench bench-queue help asan
 
 help:
 	@echo "Available targets:"
-	@echo "  build    - Build the main program"
-	@echo "  test     - Build and run tests"
-	@echo "  bench    - Build and run benchmark"
-	@echo "  clean    - Remove build directory"
-	@echo "  fmt      - Format code with clang-format"
+	@echo "  build         - Build main program"
+	@echo "  test          - Run tests"
+	@echo "  bench         - Run single image benchmark"
+	@echo "  bench-queue   - Run pipeline benchmark (Standard vs Queue)"
+	@echo "  asan          - Build with AddressSanitizer"
+	@echo "  clean         - Remove build directory"
+	@echo "  fmt           - Format code"
 
 build: $(TARGET)
 
