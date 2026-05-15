@@ -30,7 +30,6 @@ void queue_free(queue_t *queue) {
     queue_node_t *tmp_node = queue->head;
     queue->head = queue->head->next;
     img_info_free(tmp_node->image);
-    free(tmp_node->image);
     free(tmp_node);
   }
 
