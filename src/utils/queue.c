@@ -40,9 +40,29 @@ void queue_free(queue_t *queue) {
 
 void queue_enqueue(queue_t *queue, image_t *image, const char *filename) {
   img_info_t *img_info = malloc(sizeof(img_info_t));
+  if (!img_info) {
+    fprintf(stderr, "Error: malloc failed in enqueue 1\n");
+    return;
+  }
   img_info->image = image;
-  img_info->filename = filename ? strdup(filename) : NULL;
+  
+  if (filename == NULL) {
+    img_info->filename = NULL;
+  } else {
+    img_info->filename = strdup(filename);
+    if (!img_info->filename) {
+      fprintf(stderr, "Error: strdup failed\n");
+      free(img_info);
+      return;
+    }
+  }
   queue_node_t *node = malloc(sizeof(queue_node_t));
+  if (!node) {
+    fprintf(stderr, "Error: malloc failed in enqueue 3\n");
+    free((void *)img_info->filename);
+    free(img_info);
+    return;
+  }
   node->image = img_info;
   node->next = NULL;
 
@@ -72,7 +92,7 @@ img_info_t *queue_dequeue(queue_t *queue) {
   }
 
   queue_node_t *node = queue->head;
-  void *data = node->image;
+  img_info_t *data = node->image;
   queue->head = queue->head->next;
 
   if (!queue->head) {

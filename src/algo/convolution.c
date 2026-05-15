@@ -39,7 +39,7 @@ static inline void process_pixel(int x, int y, int width, int height,
 
 image_t *seq_convolution(image_t *image, filter_t *filter) {
   if (image == NULL || filter == NULL) {
-    fprintf(stderr, "Error: NULL pointer.\n");
+    fprintf(stderr, "Error: NULL pointer in convolution.\n");
     return NULL;
   }
 
@@ -73,7 +73,7 @@ image_t *seq_convolution(image_t *image, filter_t *filter) {
 
 image_t *parallel_pixel_convolution(image_t *image, filter_t *filter) {
   if (image == NULL || filter == NULL) {
-    fprintf(stderr, "Error: NULL pointer.\n");
+    fprintf(stderr, "Error: NULL pointer in convolution.\n");
     return NULL;
   }
 
@@ -108,7 +108,7 @@ image_t *parallel_pixel_convolution(image_t *image, filter_t *filter) {
 
 image_t *parallel_row_convolution(image_t *image, filter_t *filter) {
   if (image == NULL || filter == NULL) {
-    fprintf(stderr, "Error: NULL pointer.\n");
+    fprintf(stderr, "Error: NULL pointer in convolution.\n");
 
     return NULL;
   }
@@ -144,7 +144,7 @@ image_t *parallel_row_convolution(image_t *image, filter_t *filter) {
 
 image_t *parallel_column_convolution(image_t *image, filter_t *filter) {
   if (image == NULL || filter == NULL) {
-    fprintf(stderr, "Error: NULL pointer.\n");
+    fprintf(stderr, "Error: NULL pointer in convolution.\n");
     return NULL;
   }
 
@@ -179,7 +179,7 @@ image_t *parallel_column_convolution(image_t *image, filter_t *filter) {
 
 image_t *parallel_block_convolution(image_t *image, filter_t *filter) {
   if (image == NULL || filter == NULL) {
-    fprintf(stderr, "Error: NULL pointer.\n");
+    fprintf(stderr, "Error: NULL pointer in convolution.\n");
     return NULL;
   }
 

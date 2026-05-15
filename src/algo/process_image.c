@@ -80,7 +80,6 @@ int process_image(args_t *args) {
 
     int ret = store_image(new_filename, new_image);
     if (ret < 0) {
-      fprintf(stderr, "Error: failed to save output filename\n");
       FREE_IMAGES;
       free_filter(filter);
       return -1;
