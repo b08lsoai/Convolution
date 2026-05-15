@@ -8,7 +8,8 @@
 
 #define USAGE_PRINT                                                            \
   fprintf(stderr,                                                              \
-          "Usage: %s --filter=<filter_name> --mode=<mode> [--help] "           \
+          "Usage: %s --filter=<filter_name> --mode=<mode> [--help | -h] "      \
+          "[--queue | -q]"                                                     \
           "<input_file>\n",                                                    \
           argv[0]);                                                            \
   fprintf(stderr, "Use '%s --help' for more information.\n", argv[0]);
@@ -85,7 +86,8 @@ static int add_filename(args_t *args, char *filename) {
 }
 
 void print_help(char *argv[]) {
-  printf("Usage: %s --filter=<filter_name> --mode=<mode> [--help] "
+  printf("Usage: %s --filter=<filter_name> --mode=<mode> [--help | -h] "
+         "[--queue | -q] "
          "<input_file>\n\n",
          argv[0]);
 
@@ -99,6 +101,7 @@ void print_help(char *argv[]) {
   printf("                  column   - Parallel by columns\n");
   printf("                  pixel    - Parallel by individual pixels\n");
   printf("                  block    - Parallel by blocks (64x64)\n\n");
+  printf("  --queue, -q   Enable pipeline mode (process multiple images)\n\n");
   printf("  --help, -h    Show this help message\n\n");
 }
 
