@@ -6,9 +6,9 @@
 #include "parser_args.h"
 #include "queue.h"
 
-#define READERS_NUMBER 3
-#define WORKERS_NUMBER 3
-#define WRITERS_NUMBER 3
+#define READERS_NUMBER 2
+#define WORKERS_NUMBER 4
+#define WRITERS_NUMBER 2
 
 typedef struct {
   queue_t *load_queue;
