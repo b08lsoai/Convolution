@@ -27,15 +27,24 @@ void queue_free(queue_t *queue) {
     return;
 
   while (queue->head) {
-    queue_node_t *tmp = queue->head;
+    queue_node_t *tmp_node = queue->head;
     queue->head = queue->head->next;
-    free(tmp);
+    img_info_free(tmp_node->image);
+    free(tmp_node->image);
+    free(tmp_node);
   }
 
   pthread_mutex_destroy(&queue->lock);
   pthread_cond_destroy(&queue->cond_non_empty);
   pthread_cond_destroy(&queue->cond_non_full);
   free(queue);
+}
+
+void img_info_free(img_info_t *img_info) {
+  if (img_info) {
+    free((void *)img_info->filename);
+  }
+  free(img_info);
 }
 
 void queue_enqueue(queue_t *queue, image_t *image, const char *filename) {
@@ -45,22 +54,22 @@ void queue_enqueue(queue_t *queue, image_t *image, const char *filename) {
     return;
   }
   img_info->image = image;
-  
+
   if (filename == NULL) {
     img_info->filename = NULL;
   } else {
     img_info->filename = strdup(filename);
     if (!img_info->filename) {
       fprintf(stderr, "Error: strdup failed\n");
-      free(img_info);
+      img_info_free(img_info);
       return;
     }
   }
+  
   queue_node_t *node = malloc(sizeof(queue_node_t));
   if (!node) {
     fprintf(stderr, "Error: malloc failed in enqueue 3\n");
-    free((void *)img_info->filename);
-    free(img_info);
+    img_info_free(img_info);
     return;
   }
   node->image = img_info;

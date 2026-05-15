@@ -41,6 +41,7 @@ void *worker_thread(void *arg) {
   while (1) {
     img_info_t *img_info = queue_dequeue(load_queue);
     if (!img_info->filename && !img_info->image) {
+      img_info_free(img_info);
       break;
     }
     image_t *new_image = NULL;
@@ -68,18 +69,23 @@ void *worker_thread(void *arg) {
     default:
       fprintf(stderr, "Error: unknown mode %d\n", params->mode);
       free_image(new_image);
-      free_filter(filter);
+      free_image(img_info->image);
+      img_info_free(img_info);
       break;
     }
 
     if (!new_image) {
       fprintf(stderr, "Error: convolution failed\n");
       free_image(new_image);
+      free_image(img_info->image);
+      img_info_free(img_info);
       break;
     }
 
     queue_enqueue(save_queue, new_image, img_info->filename);
-    // ! free(img_info);
+    
+    free_image(img_info->image);
+    img_info_free(img_info);
   }
   return NULL;
 }
@@ -92,6 +98,7 @@ void *writer_thread(void *arg) {
   while (1) {
     img_info_t *img_info = queue_dequeue(save_queue);
     if (!img_info->filename && !img_info->image) {
+      img_info_free(img_info);
       break;
     }
     const char *new_filename =
@@ -99,16 +106,19 @@ void *writer_thread(void *arg) {
     if (!new_filename) {
       fprintf(stderr, "Error: failed to generate output filename from '%s'\n",
               img_info->filename);
-      // ! free(img_info);
+      free_image(img_info->image);
+      img_info_free(img_info);
       break;
     }
 
     int ret = store_image(new_filename, img_info->image);
     if (ret < 0) {
-      fprintf(stderr, "Error: failed to save output filename\n");
-      // ! free(img_info);
+      img_info_free(img_info);
       break;
     }
+
+    free_image(img_info->image);
+    img_info_free(img_info);
   }
   return NULL;
 }

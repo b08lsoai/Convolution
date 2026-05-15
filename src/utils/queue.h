@@ -8,6 +8,8 @@
 #define LOAD_QUEUE_SIZE 10
 #define SAVE_QUEUE_SIZE 10
 
+// ?: add id for pile
+// TODO: rename to task_data_t ?
 typedef struct {
   image_t *image;
   const char *filename;
@@ -18,6 +20,7 @@ typedef struct queue_node {
   img_info_t *image;
 } queue_node_t;
 
+// TODO: rename mutex
 typedef struct {
   queue_node_t *head;
   queue_node_t *tail;
@@ -32,3 +35,4 @@ queue_t *queue_create(size_t capacity);
 void queue_enqueue(queue_t *queue, image_t *image, const char *filename);
 img_info_t *queue_dequeue(queue_t *queue);
 void queue_free(queue_t *queue);
+void img_info_free(img_info_t *img_info);
