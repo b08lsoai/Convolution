@@ -112,8 +112,12 @@ image_t *create_empty_image(int height, int width, int channels) {
   return new_image;
 }
 
-const char *generate_filename(const char *filename, const char *filter_name) {
-  static char output[512];
+char *generate_filename(char *out, size_t out_size, const char *filename,
+                        const char *filter_name) {
+  if (!out || out_size == 0) {
+    fprintf(stderr, "Error: NULL output buffer in generate_filename\n");
+    return NULL;
+  }
 
   if (!filename || !filter_name) {
     fprintf(stderr, "Error: NULL pointer in generate_filename\n");
@@ -127,22 +131,26 @@ const char *generate_filename(const char *filename, const char *filter_name) {
     return NULL;
   }
 
-  int len = dot - filename;
-  if (len >= (int)sizeof(output)) {
+  size_t base_len = (size_t)(dot - filename);
+  size_t filter_len = strlen(filter_name);
+  size_t ext_len = strlen(dot);
+
+  if (base_len + 1 + filter_len + ext_len + 1 > out_size) {
     fprintf(stderr, "Error: filename too long\n");
     return NULL;
   }
 
-  char name_no_ext[256];
-  if (len >= (int)sizeof(name_no_ext)) {
-    len = sizeof(name_no_ext) - 1;
-  }
-  memcpy(name_no_ext, filename, len);
-  name_no_ext[len] = '\0';
+  char *p = out;
+  memcpy(p, filename, base_len);
+  p += base_len;
+  *p++ = '_';
+  memcpy(p, filter_name, filter_len);
+  p += filter_len;
+  memcpy(p, dot, ext_len);
+  p += ext_len;
+  *p = '\0';
 
-  snprintf(output, sizeof(output), "%s_%s%s", name_no_ext, filter_name, dot);
-
-  return output;
+  return out;
 }
 
 void free_image(image_t *image) {

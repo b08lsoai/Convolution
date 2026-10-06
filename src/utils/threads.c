@@ -106,9 +106,9 @@ void *writer_thread(void *arg) {
       img_info_free(img_info);
       break;
     }
-    const char *new_filename =
-        generate_filename(img_info->filename, filter_name);
-    if (!new_filename) {
+    char new_filename[OUTPUT_FILENAME_CAP];
+    if (!generate_filename(new_filename, sizeof(new_filename),
+                           img_info->filename, filter_name)) {
       fprintf(stderr, "Error: failed to generate output filename from '%s'\n",
               img_info->filename);
       free_image(img_info->image);

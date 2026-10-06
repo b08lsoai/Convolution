@@ -68,8 +68,9 @@ int process_image(args_t *args) {
       return -1;
     }
 
-    const char *new_filename = generate_filename(filename, filter_name);
-    if (!new_filename) {
+    char new_filename[OUTPUT_FILENAME_CAP];
+    if (!generate_filename(new_filename, sizeof(new_filename), filename,
+                           filter_name)) {
       fprintf(stderr, "Error: failed to generate output filename\n");
       FREE_IMAGES;
       free_filter(filter);
