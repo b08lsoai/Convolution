@@ -22,7 +22,8 @@ void *reader_thread(void *arg) {
     const char *filename = files_list[read_files_local];
     image_t *src_image = load_image(filename);
     if (!src_image) {
-      break;
+      __atomic_add_fetch(params->error_counter, 1, __ATOMIC_RELAXED);
+      continue;
     }
 
     queue_enqueue(load_queue, src_image, filename);
@@ -65,18 +66,18 @@ void *worker_thread(void *arg) {
 
     default:
       fprintf(stderr, "Error: unknown mode %d\n", params->mode);
-      free_image(new_image);
       free_image(img_info->image);
       img_info_free(img_info);
-      break;
+      return NULL;
     }
 
     if (!new_image) {
-      fprintf(stderr, "Error: convolution failed\n");
-      free_image(new_image);
+      fprintf(stderr, "Error: convolution failed for '%s'\n",
+              img_info->filename);
       free_image(img_info->image);
       img_info_free(img_info);
-      break;
+      __atomic_add_fetch(params->error_counter, 1, __ATOMIC_RELAXED);
+      continue;
     }
 
     queue_enqueue(save_queue, new_image, img_info->filename);
@@ -111,18 +112,12 @@ void *writer_thread(void *arg) {
                            img_info->filename, filter_name)) {
       fprintf(stderr, "Error: failed to generate output filename from '%s'\n",
               img_info->filename);
-      free_image(img_info->image);
-      img_info_free(img_info);
-      break;
+      __atomic_add_fetch(params->error_counter, 1, __ATOMIC_RELAXED);
+    } else if (store_image(new_filename, img_info->image) < 0) {
+      __atomic_add_fetch(params->error_counter, 1, __ATOMIC_RELAXED);
     }
 
-    int ret = store_image(new_filename, img_info->image);
-    if (ret < 0) {
-      img_info_free(img_info);
-      break;
-    }
-    read_files_local =
-        __atomic_add_fetch(params->write_counter, 1, __ATOMIC_RELEASE);
+    __atomic_add_fetch(params->write_counter, 1, __ATOMIC_RELEASE);
 
     free_image(img_info->image);
     img_info_free(img_info);

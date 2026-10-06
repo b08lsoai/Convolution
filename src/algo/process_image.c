@@ -120,6 +120,7 @@ int process_image_queue(args_t *args) {
   queue_t *save_queue = queue_create((size_t)SAVE_QUEUE_SIZE);
   atomic_size_t read_counter = 0;
   atomic_size_t write_counter = 0;
+  atomic_size_t error_counter = 0;
 
   params_t params = {.load_queue = load_queue,
                      .save_queue = save_queue,
@@ -128,7 +129,8 @@ int process_image_queue(args_t *args) {
                      .mode = args->mode,
                      .images_number = args->images_number,
                      .read_counter = &read_counter,
-                     .write_counter = &write_counter};
+                     .write_counter = &write_counter,
+                     .error_counter = &error_counter};
 
   pthread_t readers[READERS_NUMBER];
   pthread_t workers[WORKERS_NUMBER];
@@ -165,8 +167,15 @@ int process_image_queue(args_t *args) {
   for (int i = 0; i < WRITERS_NUMBER; i++) {
     pthread_join(writers[i], NULL);
   }
+
+  size_t errors = atomic_load(&error_counter);
+  if (errors > 0) {
+    fprintf(stderr, "Warning: %zu of %zu image(s) failed\n", errors,
+            args->images_number);
+  }
+
   queue_free(load_queue);
   queue_free(save_queue);
   free_filter(filter);
-  return 0;
+  return errors > 0 ? -1 : 0;
 }

@@ -19,6 +19,7 @@ typedef struct {
   conv_mode mode;
   atomic_size_t *read_counter;
   atomic_size_t *write_counter;
+  atomic_size_t *error_counter;
 } params_t;
 
 void *reader_thread(void *arg);
