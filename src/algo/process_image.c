@@ -103,6 +103,19 @@ int process_image_queue(args_t *args) {
     return -1;
   }
 
+  switch (args->mode) {
+  case MODE_SEQ:
+  case MODE_ROW:
+  case MODE_PIXEL:
+  case MODE_COLUMN:
+  case MODE_BLOCK:
+    break;
+  default:
+    fprintf(stderr, "Error: unknown mode %d\n", args->mode);
+    free_filter(filter);
+    return -1;
+  }
+
   queue_t *load_queue = queue_create((size_t)LOAD_QUEUE_SIZE);
   queue_t *save_queue = queue_create((size_t)SAVE_QUEUE_SIZE);
   atomic_size_t read_counter = 0;
