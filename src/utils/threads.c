@@ -26,7 +26,9 @@ void *reader_thread(void *arg) {
       continue;
     }
 
-    queue_enqueue(load_queue, src_image, filename);
+    if (queue_enqueue(load_queue, src_image, filename) != 0) {
+      __atomic_add_fetch(params->error_counter, 1, __ATOMIC_RELAXED);
+    }
   }
   return NULL;
 }
@@ -38,8 +40,8 @@ void *worker_thread(void *arg) {
   filter_t *filter = params->filter;
   while (1) {
     img_info_t *img_info = queue_dequeue(load_queue);
-    if (!img_info->filename && !img_info->image) {
-      img_info_free(img_info);
+    if (!img_info) {
+      // the queue is empty
       break;
     }
     image_t *new_image = NULL;
@@ -66,7 +68,6 @@ void *worker_thread(void *arg) {
 
     default:
       fprintf(stderr, "Error: unknown mode %d\n", params->mode);
-      free_image(img_info->image);
       img_info_free(img_info);
       return NULL;
     }
@@ -74,15 +75,15 @@ void *worker_thread(void *arg) {
     if (!new_image) {
       fprintf(stderr, "Error: convolution failed for '%s'\n",
               img_info->filename);
-      free_image(img_info->image);
       img_info_free(img_info);
       __atomic_add_fetch(params->error_counter, 1, __ATOMIC_RELAXED);
       continue;
     }
 
-    queue_enqueue(save_queue, new_image, img_info->filename);
+    if (queue_enqueue(save_queue, new_image, img_info->filename) != 0) {
+      __atomic_add_fetch(params->error_counter, 1, __ATOMIC_RELAXED);
+    }
 
-    free_image(img_info->image);
     img_info_free(img_info);
   }
   return NULL;
@@ -92,21 +93,14 @@ void *writer_thread(void *arg) {
   params_t *params = (params_t *)arg;
   queue_t *save_queue = params->save_queue;
   const char *filter_name = params->filter->name;
-  size_t read_files_local = 0;
-  size_t files_number = params->images_number;
 
   while (1) {
-
-    read_files_local = __atomic_load_n(params->write_counter, __ATOMIC_ACQUIRE);
-    if (read_files_local >= files_number) {
-      break;
-    }
-
     img_info_t *img_info = queue_dequeue(save_queue);
-    if (!img_info->filename && !img_info->image) {
-      img_info_free(img_info);
+    if (!img_info) {
+      // the queue is empty
       break;
     }
+
     char new_filename[OUTPUT_FILENAME_CAP];
     if (!generate_filename(new_filename, sizeof(new_filename),
                            img_info->filename, filter_name)) {
@@ -117,9 +111,6 @@ void *writer_thread(void *arg) {
       __atomic_add_fetch(params->error_counter, 1, __ATOMIC_RELAXED);
     }
 
-    __atomic_add_fetch(params->write_counter, 1, __ATOMIC_RELEASE);
-
-    free_image(img_info->image);
     img_info_free(img_info);
   }
   return NULL;

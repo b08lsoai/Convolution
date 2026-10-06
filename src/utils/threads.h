@@ -18,7 +18,6 @@ typedef struct {
   size_t images_number;
   conv_mode mode;
   atomic_size_t *read_counter;
-  atomic_size_t *write_counter;
   atomic_size_t *error_counter;
 } params_t;
 

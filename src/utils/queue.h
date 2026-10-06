@@ -1,6 +1,7 @@
 #pragma once
 
 #include <pthread.h>
+#include <stdbool.h>
 #include <stdlib.h>
 
 #include "image_io.h"
@@ -26,13 +27,17 @@ typedef struct {
   queue_node_t *tail;
   size_t size;
   size_t capacity;
+  bool closed;
   pthread_mutex_t lock;
   pthread_cond_t cond_non_empty;
   pthread_cond_t cond_non_full;
 } queue_t;
 
 queue_t *queue_create(size_t capacity);
-void queue_enqueue(queue_t *queue, image_t *image, const char *filename);
+int queue_enqueue(queue_t *queue, image_t *image, const char *filename);
 img_info_t *queue_dequeue(queue_t *queue);
+void queue_close(queue_t *queue);
 void queue_free(queue_t *queue);
+// Освобождает img_info целиком: image_t (поле image), filename и сам структуру.
+// Вызывать строго один раз на элемент — image при этом не трогать.
 void img_info_free(img_info_t *img_info);

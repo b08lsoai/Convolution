@@ -118,8 +118,15 @@ int process_image_queue(args_t *args) {
 
   queue_t *load_queue = queue_create((size_t)LOAD_QUEUE_SIZE);
   queue_t *save_queue = queue_create((size_t)SAVE_QUEUE_SIZE);
+  if (!load_queue || !save_queue) {
+    fprintf(stderr, "Error: failed to create queues\n");
+    queue_free(load_queue);
+    queue_free(save_queue);
+    free_filter(filter);
+    return -1;
+  }
+
   atomic_size_t read_counter = 0;
-  atomic_size_t write_counter = 0;
   atomic_size_t error_counter = 0;
 
   params_t params = {.load_queue = load_queue,
@@ -129,7 +136,6 @@ int process_image_queue(args_t *args) {
                      .mode = args->mode,
                      .images_number = args->images_number,
                      .read_counter = &read_counter,
-                     .write_counter = &write_counter,
                      .error_counter = &error_counter};
 
   pthread_t readers[READERS_NUMBER];
@@ -151,18 +157,12 @@ int process_image_queue(args_t *args) {
   for (int i = 0; i < READERS_NUMBER; i++) {
     pthread_join(readers[i], NULL);
   }
-
-  for (int i = 0; i < WORKERS_NUMBER; i++) {
-    queue_enqueue(load_queue, NULL, NULL);
-  }
+  queue_close(load_queue);
 
   for (int i = 0; i < WORKERS_NUMBER; i++) {
     pthread_join(workers[i], NULL);
   }
-
-  for (int i = 0; i < WRITERS_NUMBER; i++) {
-    queue_enqueue(save_queue, NULL, NULL);
-  }
+  queue_close(save_queue);
 
   for (int i = 0; i < WRITERS_NUMBER; i++) {
     pthread_join(writers[i], NULL);
