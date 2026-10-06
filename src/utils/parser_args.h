@@ -24,6 +24,7 @@ typedef enum {
 typedef struct {
   char **filenames;
   size_t images_number;
+  size_t capacity;
   conv_mode mode;
   filter_name filter;
   bool help_flag;

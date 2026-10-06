@@ -24,6 +24,7 @@ void init_args(args_t *args) {
   args->queue_flag = false;
   args->filenames = NULL;
   args->images_number = 0;
+  args->capacity = 0;
   args->mode = MODE_INVALID;
 }
 
@@ -60,25 +61,25 @@ conv_mode parse_mode_arg(char *mode_str) {
 }
 
 static int add_filename(args_t *args, char *filename) {
-  static size_t capacity = 0;
-
   if (args->filenames == NULL) {
-    capacity = INITIAL_CAPACITY;
-    args->filenames = malloc(capacity * sizeof(char *));
-    if (!args->filenames) {
+    char **fresh = malloc(INITIAL_CAPACITY * sizeof(char *));
+    if (!fresh) {
       fprintf(stderr, "Error: memory allocation failed while adding file\n");
       return -1;
     }
+    args->filenames = fresh;
+    args->capacity = INITIAL_CAPACITY;
   }
 
-  if (args->images_number >= capacity) {
-    capacity *= 2;
-    char **new = realloc(args->filenames, capacity * sizeof(char *));
+  if (args->images_number >= args->capacity) {
+    size_t new_capacity = args->capacity * 2;
+    char **new = realloc(args->filenames, new_capacity * sizeof(char *));
     if (!new) {
       fprintf(stderr, "Error: memory allocation failed while adding file\n");
       return -1;
     }
     args->filenames = new;
+    args->capacity = new_capacity;
   }
 
   args->filenames[args->images_number++] = filename;
