@@ -7,6 +7,7 @@
 #include "algo/convolution.h"
 #include "utils/filters.h"
 #include "utils/image_io.h"
+#include "utils/parser_args.h"
 
 #define NUM_RUNS 10
 
@@ -33,8 +34,8 @@ static void print_results(const char *name, double *res) {
   printf("\n");
 }
 
-static void save_results_csv(image_t *image, char *filter_name, double *seq_res,
-                             double *row_res, double *pixel_res,
+static void save_results_csv(image_t *image, const char *filter_name,
+                             double *seq_res, double *row_res, double *pixel_res,
                              double *column_res, double *block_res) {
 
   FILE *f = fopen("./benchmark_res/resul1t.csv", "w");
@@ -121,21 +122,13 @@ int main(int argc, char **argv) {
     return -1;
   }
 
-  filter_t *filter = NULL;
-  if (strcmp(argv[1], "blur") == 0) {
-    filter = create_filter(BLUR);
-  } else if (strcmp(argv[1], "motion") == 0) {
-    filter = create_filter(MOTION_BLUR);
-  } else if (strcmp(argv[1], "gaussian") == 0) {
-    filter = create_filter(GAUSSIAN_BLUR);
-  } else if (strcmp(argv[1], "edge") == 0) {
-    filter = create_filter(FIND_EDGES);
-  } else if (strcmp(argv[1], "emboss") == 0) {
-    filter = create_filter(EMBOSS);
-  } else if (strcmp(argv[1], "sharpen") == 0) {
-    filter = create_filter(SHARPEN);
+  filter_name filter_id = parse_filter_arg(argv[1]);
+  if (filter_id == INVALID) {
+    fprintf(stderr, "Error: unknown filter '%s'\n", argv[1]);
+    return -1;
   }
 
+  filter_t *filter = create_filter(filter_id);
   if (!filter) {
     fprintf(stderr, "Error: failed to create filter\n");
     return -1;
@@ -153,7 +146,7 @@ int main(int argc, char **argv) {
   printf("========================================\n");
   printf("Image:       %s (%dx%d, %d channels)\n", argv[2], image->width,
          image->height, image->channels);
-  printf("Filter:      %s (size: %d)\n", argv[1], filter->size);
+  printf("Filter:      %s (size: %d)\n", filter->name, filter->size);
   printf("Runs:        %d\n", NUM_RUNS);
   printf("========================================\n\n");
 
@@ -187,7 +180,7 @@ int main(int argc, char **argv) {
   printf("    Column:..................%.4f\n", average(column_res));
   printf("    Block:...................%.4f\n", average(block_res));
 
-  save_results_csv(image, argv[1], seq_res, row_res, pixel_res, column_res,
+  save_results_csv(image, filter->name, seq_res, row_res, pixel_res, column_res,
                    block_res);
 
   free_filter(filter);

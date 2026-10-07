@@ -50,7 +50,7 @@ void init_args(args_t *args) {
   args->mode = MODE_INVALID;
 }
 
-filter_name parse_filter_arg(char *filter_str) {
+filter_name parse_filter_arg(const char *filter_str) {
   if (strcmp(filter_str, "blur") == 0) {
     return BLUR;
   } else if (strcmp(filter_str, "motion") == 0) {

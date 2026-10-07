@@ -4,7 +4,7 @@ Image convolution tool with multiple parallelization strategies.
 
 ## Features
 
-- **Filters**: `blur`, `sharpen`, `gaussian`, `motion`, `edge`, `emboss`
+- **Filters**: `blur`, `sharpen`, `gaussian`, `motion`, `edges`, `emboss`
 - **Modes**: 
   - `seq` - sequential
   - `row` - parallel by rows

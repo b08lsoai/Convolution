@@ -33,3 +33,5 @@ typedef struct {
 
 int parse_args(int argc, char *argv[], args_t *args);
 void free_args(args_t *args);
+
+filter_name parse_filter_arg(const char *filter_str);
