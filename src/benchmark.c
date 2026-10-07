@@ -35,8 +35,9 @@ static void print_results(const char *name, double *res) {
 }
 
 static void save_results_csv(image_t *image, const char *filter_name,
-                             double *seq_res, double *row_res, double *pixel_res,
-                             double *column_res, double *block_res) {
+                             double *seq_res, double *row_res,
+                             double *pixel_res, double *column_res,
+                             double *block_res) {
 
   FILE *f = fopen("./benchmark_res/resul1t.csv", "w");
   if (f == NULL) {

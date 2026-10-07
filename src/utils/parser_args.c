@@ -14,9 +14,9 @@
           argv[0]);                                                            \
   fprintf(stderr, "Use '%s --help' for more information.\n", argv[0]);
 
-static const char *const SUPPORTED_EXTENSIONS[] = {"jpg", "jpeg", "png",
-                                                   "bmp", "tga"};
-                                                   
+static const char *const SUPPORTED_EXTENSIONS[] = {"jpg", "jpeg", "png", "bmp",
+                                                   "tga"};
+
 bool is_file(const char *filename) {
   if (!filename) {
     return false;
