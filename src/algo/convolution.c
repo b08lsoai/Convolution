@@ -13,7 +13,8 @@ static inline void process_pixel(int x, int y, int width, int height,
                                  unsigned char *new_image_data,
                                  double *filter_arr, int filter_size,
                                  int offset, double factor, double bias) {
-  double red = 0.0, green = 0.0, blue = 0.0;
+  double accum[4] = {0.0, 0.0, 0.0, 0.0};
+
   for (int filter_y = 0; filter_y < filter_size; ++filter_y) {
     for (int filter_x = 0; filter_x < filter_size; ++filter_x) {
       int image_x = (x - offset + filter_x + width) % width;
@@ -21,20 +22,17 @@ static inline void process_pixel(int x, int y, int width, int height,
       int idx = (image_y * width + image_x) * channels;
       double filter_val = filter_arr[filter_y * filter_size + filter_x];
 
-      red += image_data[idx] * filter_val;
-      green += image_data[idx + 1] * filter_val;
-      blue += image_data[idx + 2] * filter_val;
+      for (int c = 0; c < channels; ++c) {
+        accum[c] += image_data[idx + c] * filter_val;
+      }
     }
   }
 
   int dst_idx = (y * width + x) * channels;
-
-  double res_red = factor * red + bias;
-  double res_green = factor * green + bias;
-  double res_blue = factor * blue + bias;
-  new_image_data[dst_idx] = (unsigned char)BOUND(res_red, 0, 255);
-  new_image_data[dst_idx + 1] = (unsigned char)BOUND(res_green, 0, 255);
-  new_image_data[dst_idx + 2] = (unsigned char)BOUND(res_blue, 0, 255);
+  for (int c = 0; c < channels; ++c) {
+    double res = factor * accum[c] + bias;
+    new_image_data[dst_idx + c] = (unsigned char)BOUND(res, 0, 255);
+  }
 }
 
 image_t *seq_convolution(image_t *image, filter_t *filter) {

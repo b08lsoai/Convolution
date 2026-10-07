@@ -22,8 +22,7 @@ image_t *load_image(const char *filename) {
     return NULL;
   }
 
-  // Currently only RGB is supported
-  if (channels != 3) {
+  if (channels > 4 || channels < 1) {
     fprintf(stderr, "Error: unsupported number of channels (%d)\n", channels);
     stbi_image_free(image_data);
     return NULL;
