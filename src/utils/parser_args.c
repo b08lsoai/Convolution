@@ -14,9 +14,31 @@
           argv[0]);                                                            \
   fprintf(stderr, "Use '%s --help' for more information.\n", argv[0]);
 
-// Basic check: not empty and has extension
-// Actual file existence and format validation are handled by load_image()
-bool is_file(char *filename) { return (filename && strchr(filename, '.')); }
+static const char *const SUPPORTED_EXTENSIONS[] = {"jpg", "jpeg", "png",
+                                                   "bmp", "tga"};
+                                                   
+bool is_file(const char *filename) {
+  if (!filename) {
+    return false;
+  }
+
+  const char *dot = strrchr(filename, '.');
+  if (!dot || dot == filename || dot[1] == '\0') {
+    return false;
+  }
+  if (strchr(dot, '/')) {
+    return false;
+  }
+
+  const char *ext = dot + 1;
+  for (size_t i = 0;
+       i < sizeof(SUPPORTED_EXTENSIONS) / sizeof(*SUPPORTED_EXTENSIONS); i++) {
+    if (strcmp(ext, SUPPORTED_EXTENSIONS[i]) == 0) {
+      return true;
+    }
+  }
+  return false;
+}
 
 void init_args(args_t *args) {
   args->filter = INVALID;
@@ -167,7 +189,10 @@ int parse_args(int argc, char *argv[], args_t *args) {
           return -1;
         }
       } else {
-        fprintf(stderr, "Error: invalid argument '%s'\n", argv[i]);
+        fprintf(stderr,
+                "Error: '%s' is not a supported image file "
+                "(expected extension: jpg, jpeg, png, bmp, tga)\n",
+                argv[i]);
         USAGE_PRINT
         return -1;
       }
