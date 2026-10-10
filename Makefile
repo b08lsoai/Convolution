@@ -22,7 +22,9 @@ BENCH_TARGET := build/benchmark
 BENCH_QUEUE_TARGET := build/benchmark_queue
 
 TEST_SRC := $(shell find tests -name '*.c' 2>/dev/null || true)
-TEST_BIN := build/tests
+TEST_SUPPORT := tests/test_utils.c
+TEST_MAINS := $(filter-out $(TEST_SUPPORT), $(TEST_SRC))
+TEST_BINS := $(patsubst tests/%.c, build/%.tests, $(TEST_MAINS))
 
 .PHONY: build clean fmt test bench bench-queue help asan
 
@@ -50,9 +52,9 @@ $(BENCH_QUEUE_TARGET): $(BENCH_QUEUE_SRC) $(HDR)
 	@mkdir -p build
 	$(CC) $(CFLAGS_BENCH) $^ -o $@ $(LDFLAGS)
 
-$(TEST_BIN): $(SRC) $(TEST_SRC) $(HDR)
+$(TEST_BINS): build/%.tests: tests/%.c $(TEST_SUPPORT) $(SRC) $(HDR)
 	@mkdir -p build
-	$(CC) $(CFLAGS) $(SRC) $(TEST_SRC) -o $@ $(LDFLAGS) -lcmocka
+	$(CC) $(CFLAGS) $< $(TEST_SUPPORT) $(SRC) -o $@ $(LDFLAGS) -lcmocka
 
 bench: $(BENCH_TARGET)
 	@./$(BENCH_TARGET) $(FILTER) $(IMAGE)
@@ -60,8 +62,11 @@ bench: $(BENCH_TARGET)
 bench-queue: $(BENCH_QUEUE_TARGET)
 	@./$(BENCH_QUEUE_TARGET) $(FILTER_Q) $(MODE_Q) $(IMAGE)
 
-test: $(TEST_BIN)
-	@./$(TEST_BIN)
+test: $(TEST_BINS)
+	@for t in $(TEST_BINS); do \
+		echo "=== $$t ==="; \
+		./$$t || exit 1; \
+	done
 
 asan: clean
 	@mkdir -p build

@@ -82,7 +82,7 @@ static void test_rgb_image_convolution(void **state) {
 
   image_t *seq_res = seq_convolution(input_image, filter);
   assert_non_null(seq_res);
-  assert_int_equal(seq_res->channels, 2);
+  assert_int_equal(seq_res->channels, 3);
 
   free_image(seq_res);
   free_filter(filter);

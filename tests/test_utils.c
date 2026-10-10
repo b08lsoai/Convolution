@@ -1,9 +1,13 @@
+// clang-format off
+#include <setjmp.h>
 #include <stdarg.h>
 #include <stddef.h>
+#include <cmocka.h>
 
 #include "test_utils.h"
 #include "utils/filters.h"
 #include "utils/image_io.h"
+// clang-format on
 
 void assert_images_equal_msg(image_t *expected, image_t *actual,
                              const char *msg) {
