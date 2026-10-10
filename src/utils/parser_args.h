@@ -27,6 +27,7 @@ typedef struct {
   size_t capacity;
   conv_mode mode;
   filter_name filter;
+  int threads;
   bool help_flag;
   bool queue_flag;
 } args_t;

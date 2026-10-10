@@ -1,3 +1,4 @@
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,8 +9,8 @@
 
 #define USAGE_PRINT                                                            \
   fprintf(stderr,                                                              \
-          "Usage: %s --filter=<filter_name> --mode=<mode> [--help | -h] "      \
-          "[--queue | -q]"                                                     \
+          "Usage: %s --filter=<filter_name> --mode=<mode> [--threads=<N>] "    \
+          "[--help | -h] [--queue | -q] "                                      \
           "<input_file>\n",                                                    \
           argv[0]);                                                            \
   fprintf(stderr, "Use '%s --help' for more information.\n", argv[0]);
@@ -48,6 +49,7 @@ void init_args(args_t *args) {
   args->images_number = 0;
   args->capacity = 0;
   args->mode = MODE_INVALID;
+  args->threads = 0;
 }
 
 filter_name parse_filter_arg(const char *filter_str) {
@@ -109,8 +111,8 @@ static int add_filename(args_t *args, char *filename) {
 }
 
 void print_help(char *argv[]) {
-  printf("Usage: %s --filter=<filter_name> --mode=<mode> [--help | -h] "
-         "[--queue | -q] "
+  printf("Usage: %s --filter=<filter_name> --mode=<mode> [--threads=<N>] "
+         "[--help | -h] [--queue | -q] "
          "<input_file>\n\n",
          argv[0]);
 
@@ -124,6 +126,8 @@ void print_help(char *argv[]) {
   printf("                  column   - Parallel by columns\n");
   printf("                  pixel    - Parallel by individual pixels\n");
   printf("                  block    - Parallel by blocks (64x64)\n\n");
+  printf("  --threads=    Number of threads for parallel modes (default: "
+         "OpenMP)\n\n");
   printf("  --queue, -q   Enable pipeline mode (process multiple images)\n\n");
   printf("  --help, -h    Show this help message\n\n");
 }
@@ -173,6 +177,16 @@ int parse_args(int argc, char *argv[], args_t *args) {
         fprintf(stderr, "Valid modes: seq, pixel, row, column, block\n");
         return -1;
       }
+    } else if (strncmp(argv[i], "--threads=", 10) == 0) {
+      char *threads_str = argv[i] + 10;
+      char *end = NULL;
+      long threads = strtol(threads_str, &end, 10);
+      if (*threads_str == '\0' || *end != '\0' || threads < 1 ||
+          threads > INT_MAX) {
+        fprintf(stderr, "Error: --threads requires a positive integer\n");
+        return -1;
+      }
+      args->threads = (int)threads;
     } else if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0) {
       print_help(argv);
       args->help_flag = true;

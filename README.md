@@ -11,6 +11,7 @@ Image convolution tool with multiple parallelization strategies.
   - `column` - parallel by columns  
   - `pixel` - parallel by individual pixels
   - `block` - parallel by blocks (64x64)
+- **Threads**: `--threads=N` - number of threads for parallel modes (default: OpenMP)
 - **Pipeline mode**: `--queue` / `-q` - process multiple images with reader/worker/writer threads
 - **Formats**: `jpeg`, `jpg`, `png`, `bmp`, `tga`
 
@@ -23,7 +24,7 @@ make build
 ## Usage
 
 ```bash
-./build/convol <input_file> --filter=<filter> --mode=<mode> [--help | -h] [--queue | -q]
+./build/convol <input_file> --filter=<filter> --mode=<mode> [--threads=<N>] [--help | -h] [--queue | -q]
 ````
 
 ## Examples
@@ -43,6 +44,9 @@ make build
 
 # Parallel blocks with motion blur for multiple files
 ./build/convol image.png photo.png file.bmp --filter=motion --mode=block
+
+# Row-parallel execution with 4 threads
+./build/convol image.jpg --filter=blur --mode=row --threads=4
 ```
 
 ## Tests

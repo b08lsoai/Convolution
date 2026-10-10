@@ -1,3 +1,4 @@
+#include <omp.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -21,6 +22,11 @@ int main(int argc, char **argv) {
   if (args->help_flag) {
     free_args(args);
     return 0;
+  }
+
+  if (args->threads > 0) {
+    omp_set_dynamic(0);
+    omp_set_num_threads(args->threads);
   }
 
   if (args->queue_flag) {
