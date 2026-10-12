@@ -30,7 +30,8 @@ static void print_results(const char *name, double *res) {
   printf("\n");
 }
 
-static void save_results_csv(double *queue_res, double *standart_res) {
+static void save_results_csv(int threads, double *queue_res,
+                             double *standart_res) {
 
   FILE *f = fopen("./benchmark_res/result_5.csv", "w");
   if (f == NULL) {
@@ -39,6 +40,7 @@ static void save_results_csv(double *queue_res, double *standart_res) {
   }
 
   fprintf(f, "# Benchmark Results\n");
+  fprintf(f, "# Threads: %d\n", threads);
   fprintf(f, "# Runs: %d\n", NUM_RUNS);
   fprintf(f, "#\n");
 
@@ -89,9 +91,15 @@ int main(int argc, char **argv) {
     return 0;
   }
 
+  if (args->threads > 0) {
+    omp_set_dynamic(0);
+    omp_set_num_threads(args->threads);
+  }
+
   double queue_res[NUM_RUNS];
   double standart_res[NUM_RUNS];
 
+  printf("Threads: %d\n\n", omp_get_max_threads());
   printf("Running pipeline benchmarks...\n\n");
   BENCH_EXEC(process_image_queue, queue_res);
   print_results("Pipeline results:", queue_res);
@@ -111,7 +119,7 @@ int main(int argc, char **argv) {
     return -1;
   }
 
-  save_results_csv(queue_res, standart_res);
+  save_results_csv(omp_get_max_threads(), queue_res, standart_res);
 
   free_args(args);
   return ret;

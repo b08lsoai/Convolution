@@ -1,3 +1,4 @@
+#include <limits.h>
 #include <math.h>
 #include <omp.h>
 #include <stdio.h>
@@ -34,7 +35,7 @@ static void print_results(const char *name, double *res) {
   printf("\n");
 }
 
-static void save_results_csv(image_t *image, const char *filter_name,
+static void save_results_csv(image_t *image, const char *filter_name, int threads,
                              double *seq_res, double *row_res,
                              double *pixel_res, double *column_res,
                              double *block_res) {
@@ -49,6 +50,7 @@ static void save_results_csv(image_t *image, const char *filter_name,
   fprintf(f, "# Filter: %s\n", filter_name);
   fprintf(f, "# Image: %dx%d, %d channels\n", image->width, image->height,
           image->channels);
+  fprintf(f, "# Threads: %d\n", threads);
   fprintf(f, "# Runs: %d\n", NUM_RUNS);
   fprintf(f, "#\n");
 
@@ -116,12 +118,25 @@ void run_benchmark(image_t *image, filter_t *filter, conv_mode mode,
   }
 }
 
-// Usage: make bench FILTER=<filter> IMAGE=<image>
+// Usage: make bench FILTER=<filter> IMAGE=<image> THREADS=<n>
 int main(int argc, char **argv) {
   if (argc < 3) {
     fprintf(stderr, "Error: filter and image are required\n");
     return -1;
   }
+
+  int threads = omp_get_max_threads();
+  if (argc >= 4) {
+    char *end = NULL;
+    long parsed = strtol(argv[3], &end, 10);
+    if (*argv[3] == '\0' || *end != '\0' || parsed < 1 || parsed > INT_MAX) {
+      fprintf(stderr, "Error: invalid thread count '%s'\n", argv[3]);
+      return -1;
+    }
+    threads = (int)parsed;
+  }
+  omp_set_dynamic(0);
+  omp_set_num_threads(threads);
 
   filter_name filter_id = parse_filter_arg(argv[1]);
   if (filter_id == INVALID) {
@@ -148,6 +163,7 @@ int main(int argc, char **argv) {
   printf("Image:       %s (%dx%d, %d channels)\n", argv[2], image->width,
          image->height, image->channels);
   printf("Filter:      %s (size: %d)\n", filter->name, filter->size);
+  printf("Threads:     %d\n", threads);
   printf("Runs:        %d\n", NUM_RUNS);
   printf("========================================\n\n");
 
@@ -181,8 +197,8 @@ int main(int argc, char **argv) {
   printf("    Column:..................%.4f\n", average(column_res));
   printf("    Block:...................%.4f\n", average(block_res));
 
-  save_results_csv(image, filter->name, seq_res, row_res, pixel_res, column_res,
-                   block_res);
+  save_results_csv(image, filter->name, threads, seq_res, row_res, pixel_res,
+                   column_res, block_res);
 
   free_filter(filter);
   free_image(image);

@@ -32,8 +32,8 @@ help:
 	@echo "Available targets:"
 	@echo "  build         - Build main program"
 	@echo "  test          - Run tests"
-	@echo "  bench         - Run single image benchmark"
-	@echo "  bench-queue   - Run pipeline benchmark (Standard vs Queue)"
+	@echo "  bench         - Run single image benchmark (FILTER, IMAGE, THREADS)"
+	@echo "  bench-queue   - Run pipeline benchmark (FILTER_Q, MODE_Q, IMAGE, THREADS)"
 	@echo "  asan          - Build with AddressSanitizer"
 	@echo "  clean         - Remove build directory"
 	@echo "  fmt           - Format code"
@@ -57,10 +57,10 @@ $(TEST_BINS): build/%.tests: tests/%.c $(TEST_SUPPORT) $(SRC) $(HDR)
 	$(CC) $(CFLAGS) $< $(TEST_SUPPORT) $(SRC) -o $@ $(LDFLAGS) -lcmocka
 
 bench: $(BENCH_TARGET)
-	@./$(BENCH_TARGET) $(FILTER) $(IMAGE)
+	@./$(BENCH_TARGET) $(FILTER) $(IMAGE) $(THREADS)
 
 bench-queue: $(BENCH_QUEUE_TARGET)
-	@./$(BENCH_QUEUE_TARGET) $(FILTER_Q) $(MODE_Q) $(IMAGE)
+	@./$(BENCH_QUEUE_TARGET) $(FILTER_Q) $(MODE_Q) $(IMAGE) --threads=$(THREADS)
 
 test: $(TEST_BINS)
 	@for t in $(TEST_BINS); do \
@@ -81,6 +81,7 @@ fmt:
 # Default values for benchmark
 FILTER ?= motion
 IMAGE ?= ./images/test_image.jpg
+THREADS ?= 4
 
 # Default values for queue benchmark
 MODE_Q ?= --mode=block
